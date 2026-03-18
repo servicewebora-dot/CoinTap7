@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>CoinTap</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #1a1a1a, #111);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 50px;
+      font-size: 2.5em;
+    }
+    button {
+      font-size: 2em;
+      padding: 25px 50px;
+      margin-top: 50px;
+      background: #ffcc00;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    #score, #bonus {
+      margin-top: 30px;
+      font-size: 1.5em;
+    }
+    #leaderboard {
+      margin-top: 40px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Appuie sur la pièce ! 💰</h1>
+  <button id="coinBtn">TAP TO WIN</button>
+  <div id="score">Gains : 0</div>
+  <div id="bonus">Bonus quotidien : +5 coins</div>
+  <div id="leaderboard">
+    <h2>Leaderboard</h2>
+    <ol id="leaders">
+      <li>Player1: 50</li>
+      <li>Player2: 40</li>
+      <li>Player3: 30</li>
+    </ol>
+  </div>
+
+  <script>
+    // Initialisation
+    let score = 0;
+    const dailyBonus = 5;
+    const coinBtn = document.getElementById('coinBtn');
+    const scoreDiv = document.getElementById('score');
+    const bonusDiv = document.getElementById('bonus');
+    const leadersList = document.getElementById('leaders');
+
+    // Fonction pour ajouter les gains aléatoires
+    function addCoins() {
+      let gain = Math.floor(Math.random() * 10) + 1; // 1 à 10 coins
+      score += gain;
+      scoreDiv.innerText = "Gains : " + score;
+      updateLeaderboard(score);
+    }
+
+    // Ajouter bonus quotidien
+    function addDailyBonus() {
+      const lastBonus = localStorage.getItem('lastBonus');
+      const today = new Date().toDateString();
+      if(lastBonus !== today) {
+        score += dailyBonus;
+        localStorage.setItem('lastBonus', today);
+        scoreDiv.innerText = "Gains : " + score;
+        alert("Bonus quotidien ajouté ! +5 coins");
+      }
+    }
+
+    // Leaderboard simple (localStorage)
+    function updateLeaderboard(currentScore) {
+      let leaders = JSON.parse(localStorage.getItem('leaders') || '[]');
+      leaders.push({name: "Vous", score: currentScore});
+      leaders.sort((a,b) => b.score - a.score);
+      leaders = leaders.slice(0,5);
+      localStorage.setItem('leaders', JSON.stringify(leaders));
+      renderLeaderboard(leaders);
+    }
+
+    function renderLeaderboard(leaders) {
+      leadersList.innerHTML = "";
+      leaders.forEach(l => {
+        const li = document.createElement('li');
+        li.innerText = l.name + ": " + l.score;
+        leadersList.appendChild(li);
+      });
+    }
+
+    // Événements
+    coinBtn.addEventListener('click', addCoins);
+    window.onload = () => {
+      addDailyBonus();
+      const savedLeaders = JSON.parse(localStorage.getItem('leaders') || '[]');
+      renderLeaderboard(savedLeaders);
+    };
+  </script>
+</body>
+</html>
